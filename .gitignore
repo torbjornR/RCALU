@@ -91,3 +91,10 @@ xlnx_auto_0_xdb/
 xst/
 _ngo/
 _xmsgs/
+
+# extra stuff
+*.swp
+*.xml
+*.gz
+.project
+.settings

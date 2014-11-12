@@ -37,11 +37,12 @@ begin
    highlow <= saturate & cint(width-1 downto width-2);
    
  
-   
-   with highlow select
-    y <=  ('1' & (width-2 downto 0 => '0')) when "110",
-          ('0' & (width-2 downto 0 => '1')) when "101",
-          sum when others;
+--   
+--   with highlow select
+--    y <=  ('1' & (width-2 downto 0 => '0')) when "110",
+--          ('0' & (width-2 downto 0 => '1')) when "101",
+--          sum when others;
+y<=sum;
 
 
 G1: for i in 0 to width-1 generate

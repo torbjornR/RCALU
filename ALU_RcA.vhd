@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 
 entity ALU_RcA is
-  generic (width: integer := 32);
+  generic (width: integer := 8);
   port (
     Clk : in std_logic;
     Reset : in std_logic;
@@ -26,17 +26,16 @@ architecture RTL of ALU_RcA is
   signal sum0010 : std_logic_vector(width-1 downto 0);
   signal sum0011 : std_logic_vector(width-1 downto 0);
   signal trach : STD_LOGIC;
-
-
+  signal temp_cflag:std_logic;
+ 
 begin
-  
+temp_cflag<=not(cflag);
 LoadRegisters: process (clk,Reset)
 begin
   if Reset = '1'then
     AMem  <= (others => '0');
     BMem  <= (others => '0');
     OpMem <= (others => '0');
-    Outs  <= (others => '0');
   elsif rising_edge(Clk) then
     AMem <= A;
     BMem <= B;
@@ -47,7 +46,7 @@ end process LoadRegisters;
 
 cortroller: process(OpMem, AMem, BMem, ShiftWalue, sum0000, sum0001, sum0010, sum0011)
   begin
-   ShiftWalue <= to_integer(unsigned(BMem(6 downto 0)));
+   ShiftWalue <= to_integer(unsigned(BMem(2 downto 0)));
   case OpMem is
     when "0000" => 
       Outs <= sum0000;    
@@ -70,10 +69,10 @@ cortroller: process(OpMem, AMem, BMem, ShiftWalue, sum0000, sum0001, sum0010, su
     when "1010" => 
       Outs <= std_logic_vector(shift_right((signed(Amem)) , ShiftWalue));
     when "1011" =>  
-      Outs <= AMem(width-1) & std_logic_vector(shift_right((signed(Amem)) , ShiftWalue));
-      
-    when others => null;
-  end case;
+      Outs <= AMem(width-1) & std_logic_vector(shift_right((signed(Amem(width-1 downto 1))) , ShiftWalue));
+ 	when others =>
+	null;
+ end case;
 end process cortroller;  
     
   
@@ -102,7 +101,7 @@ adder0010: entity work.RippleCarry     --ADDC
   port map(a        => A,
            b        => B,
            saturate => '0',
-           add_sub  => not(Cflag),
+           add_sub  => temp_cflag,
            Cout => trach,
            y        => sum0010
            );  
@@ -110,12 +109,11 @@ adder0010: entity work.RippleCarry     --ADDC
 adder0011: entity work.RippleCarry     -- sub
   generic map(width => width)
   port map(a        => A,
-           b        => not(B),
+           b        => B,
            saturate => '0',
            add_sub  => '0',
            Cout => trach,
            y        => sum0011
            );       
                
-           
 end architecture RTL;
